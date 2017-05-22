@@ -1,6 +1,6 @@
 {
   "name": "data-keeper",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Storage data in csv format",
   "main": "keeper.js",
   "scripts": {
