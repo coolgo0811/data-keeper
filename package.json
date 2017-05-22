@@ -1,0 +1,15 @@
+{
+  "name": "data-keeper",
+  "version": "1.0.0",
+  "description": "Storage data in csv format",
+  "main": "keeper.js",
+  "scripts": {
+    "start": "node .",
+    "test": "node test.js"
+  },
+  "author": "Steven Li",
+  "license": "ISC",
+  "dependencies": {
+    "uuid": "^3.0.1"
+  }
+}
