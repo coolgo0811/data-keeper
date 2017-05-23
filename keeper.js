@@ -93,7 +93,7 @@ class Keeper {
   }
 
   dataAvailable () {
-    return this._fileList.length !== 0;
+    return (this._fileList.length !== 0 || this._records.length !== 0);
   }
 
   read (count) {
@@ -101,7 +101,7 @@ class Keeper {
     let readCount = count || constant.readRecordCount;
     let output = [];
     try {
-      if (this._fileList.length === 0) {
+      if (this._fileList.length === 0 && this._records.length === 0) {
         return output;
       }
 
