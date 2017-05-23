@@ -21,7 +21,7 @@ for (let i = 0; i < logs.length; i++) {
 }
 
 while (keeper.dataAvailable()) {  // check any records exist or not
-  let records = keeper.read(100);  // get 100 records back
+  let records = keeper.read(1);  // get 100 records back
   for (let i = 0; i < records.length; i++) {
     let record = records[i];
     for (var key in record) {

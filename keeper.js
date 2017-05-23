@@ -107,11 +107,11 @@ class Keeper {
 
       while (output.length < readCount) {
         if (this._records.length >= readCount) {
-          output = this._records.slice(0, readCount);
+          output = this._records.splice(0, readCount);
         } else {
           if (this._fileList.length === 0) {
             if (this._records.length > 0) {
-              output = output.concat(this._records.slice(0, this._records.length));
+              output = output.concat(this._records.splice(0, this._records.length));
             }
             break;
           }
