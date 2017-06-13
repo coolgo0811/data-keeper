@@ -1,6 +1,6 @@
 # data-keeper
 
-data-keeper is a utility node-module for storing data in csv format.
+data-keeper is a utility node-module for keep temporary data (json object) in files. The data will be compressed for disk space saving.
 
 ## Installation
 
@@ -10,9 +10,7 @@ data-keeper is a utility node-module for storing data in csv format.
 
 ```js
 const DataKeeper = require('data-keeper');
-
-let columns = ['t1', 't2', 't3', 'ts'];   // define columns
-let dataKeeper = new DataKeeper(columns);
+let dataKeeper = new DataKeeper();
 
 ```
 
@@ -38,7 +36,7 @@ dataKeeper.init(basePath);
 <a name="write"></a>
 ### #write()
 
-Write a data record to csv file.
+Write a data record to file.
 
 ```js
 let data = { t1: 1, t3: 3, ts: new Date() };
@@ -49,7 +47,7 @@ dataKeeper.write(data);
 <a name="read"></a>
 ### #read([int])
 
-Get a few of data records from stoage. The input is the count of data that you want. If no input, the default count is 100.
+Get a few of data records from files. The input is the count of data that you want. If no input, the default count is 100.
 
 ```js
 let records = keeper.read(100);

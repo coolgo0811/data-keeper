@@ -1,8 +1,7 @@
 'use strict';
 
 module.exports = {
-  fileNameFormat: '%s.csv',
-  defaultNullValue: 'null',
+  fileNameFormat: '%s',
   writeRecordCount: 5000,
   readRecordCount: 100
 };

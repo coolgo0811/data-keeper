@@ -1,6 +1,7 @@
 'use strict';
 
 const fs = require('fs');
+const zlib = require('zlib');
 const util = require('util');
 const path = require('path');
 const uuidV1 = require('uuid/v1');
@@ -8,15 +9,8 @@ const uuidV1 = require('uuid/v1');
 const constant = require('./const.js');
 
 function _writeFile (dataObj) {
-  let record = [];
-  for (let i = 0; i < this._columns.length; i++) {
-    let value = dataObj[this._columns[i]];
-    value = (typeof value !== 'undefined') ? dataObj[this._columns[i]] : constant.defaultNullValue;
-    if (value instanceof Date) {
-      value = value.toISOString();
-    }
-    record.push(value);
-  }
+  let buff = Buffer.from(JSON.stringify(dataObj));
+  var zipBuff = zlib.gzipSync(buff);
 
   if (this._currentFilePath === null) {
     let fileName = util.format(constant.fileNameFormat, uuidV1());
@@ -24,8 +18,9 @@ function _writeFile (dataObj) {
     this._fileList.push(this._currentFilePath);
   }
 
+  zipBuff = Buffer.concat([zipBuff, Buffer.from('\n')]);
   // let fd = fs.openSync(this._currentFilePath, 'w+');
-  fs.appendFileSync(this._currentFilePath, record.join(',') + '\n');
+  fs.appendFileSync(this._currentFilePath, zipBuff, 0, zipBuff.length);
   // fs.closeSync(this._currentFilePath);
   this._currentRecordCount++;
 
@@ -35,9 +30,30 @@ function _writeFile (dataObj) {
   }
 }
 
+function _splitBuffer (buf, delimiter) {
+  let arr = [];
+  let pos = 0;
+
+  for (var i = 0, l = buf.length; i < l; i++) {
+    if (buf[i] !== delimiter) continue;
+    if (i === 0) {
+      pos = 1;
+      continue; // skip if it's at the start of buffer
+    }
+    arr.push(buf.slice(pos, i));
+    pos = i + 1;
+  }
+
+  // add final part
+  if (pos < l) {
+    arr.push(buf.slice(pos, l));
+  }
+
+  return arr;
+}
+
 class Keeper {
-  constructor (columns) {
-    this._columns = columns;
+  constructor () {
     this._storagePath = null;
 
     // for write
@@ -117,17 +133,11 @@ class Keeper {
           }
           let filePath = this._fileList[0];
           if (fs.existsSync(filePath)) {
-            let contents = fs.readFileSync(filePath, { encoding: 'utf8' });
-            let records = contents.trim().split('\n');
+            let buff = fs.readFileSync(filePath);
+            let records = _splitBuffer(buff, Buffer.from('\n')[0]);
             for (let i = 0; i < records.length; i++) {
-              let record = records[i].split(',');
-              let data = {};
-              for (let j = 0; j < this._columns.length; j++) {
-                if (record[j] !== constant.defaultNullValue) {
-                  data[this._columns[j]] = record[j];
-                }
-              }
-              this._records.push(data);
+              let record = zlib.unzipSync(records[i]);
+              this._records.push(JSON.parse(record));
             }
 
             fs.unlinkSync(filePath);
