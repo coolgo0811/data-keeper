@@ -5,6 +5,7 @@ const zlib = require('zlib');
 const util = require('util');
 const path = require('path');
 const uuidV1 = require('uuid/v1');
+const bsplit = require('buffer-split');
 
 const constant = require('./const.js');
 
@@ -18,7 +19,7 @@ function _writeFile (dataObj) {
     this._fileList.push(this._currentFilePath);
   }
 
-  zipBuff = Buffer.concat([zipBuff, Buffer.from('\n')]);
+  zipBuff = Buffer.concat([zipBuff, Buffer.from('EOF')]);
   // let fd = fs.openSync(this._currentFilePath, 'w+');
   fs.appendFileSync(this._currentFilePath, zipBuff, 0, zipBuff.length);
   // fs.closeSync(this._currentFilePath);
@@ -35,6 +36,8 @@ function _splitBuffer (buf, delimiter) {
   let pos = 0;
 
   for (var i = 0, l = buf.length; i < l; i++) {
+    for (var j = 0; i < delimiter.length; j++) {
+    }
     if (buf[i] !== delimiter) continue;
     if (i === 0) {
       pos = 1;
@@ -134,8 +137,9 @@ class Keeper {
           let filePath = this._fileList[0];
           if (fs.existsSync(filePath)) {
             let buff = fs.readFileSync(filePath);
-            let records = _splitBuffer(buff, Buffer.from('\n')[0]);
+            let records = bsplit(buff, Buffer.from('EOF'));
             for (let i = 0; i < records.length; i++) {
+              if (records[i].length === 0) continue;
               let record = zlib.unzipSync(records[i]);
               this._records.push(JSON.parse(record));
             }
