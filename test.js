@@ -16,16 +16,18 @@ let keeper = new Keeper();
 
 keeper.init(basePath);
 
-for (let i = 0; i < logs.length; i++) {
-  keeper.write(logs[i]);  // write a data record
-}
-
-while (keeper.dataAvailable()) {  // check any records exist or not
-  let records = keeper.read(1);  // get 1 records back
-  for (let i = 0; i < records.length; i++) {
-    let record = records[i];
-    for (var key in record) {
-      console.log(util.format('[%s] = %s', key, record[key].toString()));
+while (true) {
+  if (keeper.dataAvailable()) {  // check any records exist or not
+    let records = keeper.read(1);  // get 1 records back
+    for (let i = 0; i < records.length; i++) {
+      let record = records[i];
+      for (var key in record) {
+        console.log(util.format('[%s] = %s', key, record[key].toString()));
+      }
+    }
+  } else {
+    for (let i = 0; i < logs.length; i++) {
+      keeper.write(logs[i]);  // write a data record
     }
   }
 }

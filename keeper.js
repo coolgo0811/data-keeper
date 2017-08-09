@@ -134,9 +134,12 @@ class Keeper {
             }
             break;
           }
-          let filePath = this._fileList[0];
-          if (fs.existsSync(filePath)) {
-            let buff = fs.readFileSync(filePath);
+          // let filePath = this._fileList[0];
+          if (this._currentFilePath === null) {
+            this._currentFilePath = this._fileList[0];
+          }
+          if (fs.existsSync(this._currentFilePath)) {
+            let buff = fs.readFileSync(this._currentFilePath);
             let records = bsplit(buff, Buffer.from('EOF'));
             for (let i = 0; i < records.length; i++) {
               if (records[i].length === 0) continue;
@@ -144,7 +147,9 @@ class Keeper {
               this._records.push(JSON.parse(record));
             }
 
-            fs.unlinkSync(filePath);
+            fs.unlinkSync(this._currentFilePath);
+            this._currentFilePath = null;
+            this._currentRecordCount = 0;
           }
           this._fileList.splice(0, 1);
         }
