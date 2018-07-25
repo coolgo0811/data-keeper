@@ -4,7 +4,7 @@ const fs = require('fs');
 const zlib = require('zlib');
 const util = require('util');
 const path = require('path');
-const uuidV1 = require('uuid/v1');
+const uuidV4 = require('uuid/v4');
 const bsplit = require('buffer-split');
 
 const constant = require('./const.js');
@@ -14,7 +14,7 @@ function _writeFile (dataObj) {
   var zipBuff = zlib.gzipSync(buff, {level: 1});
 
   if (this._currentFilePath === null) {
-    let fileName = util.format(constant.fileNameFormat, uuidV1());
+    let fileName = util.format(constant.fileNameFormat, uuidV4());
     this._currentFilePath = path.join(this._storagePath, fileName);
     this._fileList.push(this._currentFilePath);
   }
@@ -25,7 +25,7 @@ function _writeFile (dataObj) {
   // fs.closeSync(this._currentFilePath);
   this._currentRecordCount++;
 
-  if (this._currentRecordCount === constant.writeRecordCount) {
+  if (this._currentRecordCount === this.writeRecordCount) {
     this._currentRecordCount = 0;
     this._currentFilePath = null;
   }
@@ -56,8 +56,9 @@ function _splitBuffer (buf, delimiter) {
 }
 
 class Keeper {
-  constructor () {
+  constructor (options) {
     this._storagePath = null;
+    this.writeRecordCount = (options && options.fileRecordCount) ? options.fileRecordCount : constant.writeRecordCount;
 
     // for write
     this._currentRecordCount = 0;
@@ -148,10 +149,13 @@ class Keeper {
             }
 
             fs.unlinkSync(this._currentFilePath);
-            this._currentFilePath = null;
-            this._currentRecordCount = 0;
           }
-          this._fileList.splice(0, 1);
+          let idx = this._fileList.indexOf(this._currentFilePath);
+          if (idx >= 0) {
+            this._fileList.splice(idx, 1);
+          }
+          this._currentFilePath = null;
+          this._currentRecordCount = 0;
         }
       }
     } catch (err) {

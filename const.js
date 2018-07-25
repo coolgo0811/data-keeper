@@ -2,6 +2,6 @@
 
 module.exports = {
   fileNameFormat: '%s',
-  writeRecordCount: 5000,
+  writeRecordCount: 500,
   readRecordCount: 100
 };

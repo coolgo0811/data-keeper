@@ -12,13 +12,13 @@ let logs = [
   { t1: 4, t2: 5, t3: 6, ts: new Date() }
 ];
 
-let keeper = new Keeper();
+let keeper = new Keeper({ fileRecordCount: 100 });
 
 keeper.init(basePath);
 
 while (true) {
-  if (keeper.dataAvailable()) {  // check any records exist or not
-    let records = keeper.read(1);  // get 1 records back
+  if (keeper.dataAvailable()) { // check any records exist or not
+    let records = keeper.read(1); // get 1 records back
     for (let i = 0; i < records.length; i++) {
       let record = records[i];
       for (var key in record) {
@@ -27,7 +27,7 @@ while (true) {
     }
   } else {
     for (let i = 0; i < logs.length; i++) {
-      keeper.write(logs[i]);  // write a data record
+      keeper.write(logs[i]); // write a data record
     }
   }
 }
