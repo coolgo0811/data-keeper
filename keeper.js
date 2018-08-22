@@ -13,46 +13,22 @@ function _writeFile (dataObj) {
   let buff = Buffer.from(JSON.stringify(dataObj));
   var zipBuff = zlib.gzipSync(buff, {level: 1});
 
-  if (this._currentFilePath === null) {
+  if (this._currWriteFilePath === null) {
     let fileName = util.format(constant.fileNameFormat, uuidV4());
-    this._currentFilePath = path.join(this._storagePath, fileName);
-    this._fileList.push(this._currentFilePath);
+    this._currWriteFilePath = path.join(this._storagePath, fileName);
+    this._fileList.push(this._currWriteFilePath);
   }
 
   zipBuff = Buffer.concat([zipBuff, Buffer.from('EOF')]);
-  // let fd = fs.openSync(this._currentFilePath, 'w+');
-  fs.appendFileSync(this._currentFilePath, zipBuff, 0, zipBuff.length);
-  // fs.closeSync(this._currentFilePath);
+  // let fd = fs.openSync(this._currWriteFilePath, 'w+');
+  fs.appendFileSync(this._currWriteFilePath, zipBuff);
+  // fs.closeSync(this._currWriteFilePath);
   this._currentRecordCount++;
 
   if (this._currentRecordCount === this.writeRecordCount) {
     this._currentRecordCount = 0;
-    this._currentFilePath = null;
+    this._currWriteFilePath = null;
   }
-}
-
-function _splitBuffer (buf, delimiter) {
-  let arr = [];
-  let pos = 0;
-
-  for (var i = 0, l = buf.length; i < l; i++) {
-    for (var j = 0; i < delimiter.length; j++) {
-    }
-    if (buf[i] !== delimiter) continue;
-    if (i === 0) {
-      pos = 1;
-      continue; // skip if it's at the start of buffer
-    }
-    arr.push(buf.slice(pos, i));
-    pos = i + 1;
-  }
-
-  // add final part
-  if (pos < l) {
-    arr.push(buf.slice(pos, l));
-  }
-
-  return arr;
 }
 
 class Keeper {
@@ -62,9 +38,10 @@ class Keeper {
 
     // for write
     this._currentRecordCount = 0;
-    this._currentFilePath = null;
+    this._currWriteFilePath = null;
 
     // for read
+    this._currReadFilePath = null;
     this._fileList = [];
     this._records = [];
 
@@ -136,11 +113,11 @@ class Keeper {
             break;
           }
           // let filePath = this._fileList[0];
-          if (this._currentFilePath === null) {
-            this._currentFilePath = this._fileList[0];
+          if (this._currReadFilePath === null) {
+            this._currReadFilePath = this._fileList[0];
           }
-          if (fs.existsSync(this._currentFilePath)) {
-            let buff = fs.readFileSync(this._currentFilePath);
+          if (fs.existsSync(this._currReadFilePath)) {
+            let buff = fs.readFileSync(this._currReadFilePath);
             let records = bsplit(buff, Buffer.from('EOF'));
             for (let i = 0; i < records.length; i++) {
               if (records[i].length === 0) continue;
@@ -148,13 +125,13 @@ class Keeper {
               this._records.push(JSON.parse(record));
             }
 
-            fs.unlinkSync(this._currentFilePath);
+            fs.unlinkSync(this._currReadFilePath);
           }
-          let idx = this._fileList.indexOf(this._currentFilePath);
+          let idx = this._fileList.indexOf(this._currReadFilePath);
           if (idx >= 0) {
             this._fileList.splice(idx, 1);
           }
-          this._currentFilePath = null;
+          this._currReadFilePath = null;
           this._currentRecordCount = 0;
         }
       }
