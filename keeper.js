@@ -11,7 +11,11 @@ const constant = require('./const.js');
 
 function _writeFile (dataObj) {
   let buff = Buffer.from(JSON.stringify(dataObj));
-  var zipBuff = zlib.gzipSync(buff, {level: 1});
+  var zipBuff = zlib.gzipSync(buff, { level: 1 });
+
+  if (this._fileList.indexOf(this._currWriteFilePath) < 0) {
+    this._fileList.push(this._currWriteFilePath);
+  }
 
   if (this._currWriteFilePath === null) {
     let fileName = util.format(constant.fileNameFormat, uuidV4());
