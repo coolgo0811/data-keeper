@@ -4,7 +4,7 @@ const fs = require('fs');
 const zlib = require('zlib');
 const util = require('util');
 const path = require('path');
-const uuidV4 = require('uuid/v4');
+// const uuidV4 = require('uuid/v4');
 const bsplit = require('buffer-split');
 
 const constant = require('./const.js');
@@ -18,7 +18,9 @@ function _writeFile (dataObj) {
   }
 
   if (this._currWriteFilePath === null) {
-    let fileName = util.format(constant.fileNameFormat, uuidV4());
+    let ts = new Date().valueOf();
+    let fileName = util.format(constant.fileNameFormat, ts);
+    // let fileName = util.format(constant.fileNameFormat, uuidV4());
     this._currWriteFilePath = path.join(this._storagePath, fileName);
     this._fileList.push(this._currWriteFilePath);
   }
